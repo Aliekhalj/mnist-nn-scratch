@@ -1,99 +1,113 @@
 # 🧠 Neural Network from Scratch
 
-This repository contains a **simple neural network implemented entirely from scratch in Python**, using only `NumPy` for numerical operations. The network is trained to recognize **handwritten digits** from the MNIST dataset.  
-
-It’s a great project to understand **forward propagation, backpropagation, and gradient descent** without relying on frameworks like TensorFlow or PyTorch.
+This project implements a **simple neural network from scratch in Python** (no TensorFlow/PyTorch) to classify handwritten digits from the MNIST dataset. It’s designed to help understand the inner workings of a neural network, including forward propagation, backpropagation, and gradient descent.
 
 ---
 
-## 🚀 Features
+## 📦 Project Overview
 
-- Two-layer neural network: input → hidden → output
-- ReLU activation for hidden layer
-- Softmax activation for output layer
-- Cross-entropy loss (via one-hot encoding)
-- Training via gradient descent
-- Evaluation on a development set
-- Visualizing predictions of individual digits
+The network architecture:
 
----
+- **Input layer:** 784 neurons (28x28 pixels flattened)  
+- **Hidden layer:** 10 neurons, ReLU activation  
+- **Output layer:** 10 neurons, Softmax activation  
 
-## 📊 How It Works
+### Key Components
 
-### 1. Forward Propagation
+1. **ReLU Activation**  
+   - `ReLU(x) = max(0, x)`  
+   - Used in the hidden layer to introduce non-linearity.
 
-The network computes outputs using:
+2. **Softmax Activation**  
+   - Converts raw scores into probabilities for each digit (0–9).  
+   - Each output sums to 1, representing a probability distribution.
 
-\[
-Z^{[1]} = W^{[1]} X + b^{[1]} \\
-A^{[1]} = \text{ReLU}(Z^{[1]}) \\
-Z^{[2]} = W^{[2]} A^{[1]} + b^{[2]} \\
-A^{[2]} = \text{Softmax}(Z^{[2]})
-\]
+3. **One-Hot Encoding**  
+   - Converts labels into a vector where the correct class is 1, the rest 0.  
+   - Example: label `3` → `[0,0,0,1,0,0,0,0,0,0]`.
 
-Where:  
+4. **Forward Propagation**  
+   - Computes outputs of each layer:  
+     ```text
+     Z1 = W1*X + b1
+     A1 = ReLU(Z1)
+     Z2 = W2*A1 + b2
+     A2 = Softmax(Z2)
+     ```
+   - Produces predictions and intermediate activations for backpropagation.
 
-- \(X\) = input features (pixels)  
-- \(W^{[1]}, b^{[1]}\) = weights and biases for layer 1  
-- \(W^{[2]}, b^{[2]}\) = weights and biases for layer 2  
-- \(A^{[2]}\) = predicted probabilities for each digit class
+5. **Backward Propagation**  
+   - Computes gradients to update weights and biases:  
+     ```text
+     dZ2 = A2 - Y_one_hot
+     dW2 = (1/m) * dZ2 * A1.T
+     db2 = (1/m) * sum(dZ2)
+     dZ1 = W2.T * dZ2 * ReLU_deriv(Z1)
+     dW1 = (1/m) * dZ1 * X.T
+     db1 = (1/m) * sum(dZ1)
+     ```
 
----
-
-### 2. Backward Propagation
-
-Gradients are computed via the chain rule:
-
-\[
-dZ^{[2]} = A^{[2]} - Y_{\text{one-hot}} \\
-dW^{[2]} = \frac{1}{m} dZ^{[2]} A^{[1]^T} \\
-db^{[2]} = \frac{1}{m} \sum dZ^{[2]} \\
-dZ^{[1]} = W^{[2]^T} dZ^{[2]} \odot \text{ReLU}'(Z^{[1]}) \\
-dW^{[1]} = \frac{1}{m} dZ^{[1]} X^T \\
-db^{[1]} = \frac{1}{m} \sum dZ^{[1]}
-\]
-
-- \(Y_{\text{one-hot}}\) = one-hot encoded labels  
-- \(m\) = number of examples  
-- \(\odot\) = element-wise multiplication
+6. **Parameter Update (Gradient Descent)**  
+   ```text
+   W = W - alpha * dW
+   b = b - alpha * db
+- `alpha` is the learning rate controlling step size.
 
 ---
 
-### 3. Parameter Update
+## 🏋️ Training
 
-Weights and biases are updated with **gradient descent**:
-
-\[
-W = W - \alpha dW \\
-b = b - \alpha db
-\]
-
-- \(\alpha\) = learning rate  
-
----
-
-## 🛠 Usage
-
-1. **Load MNIST dataset** (`MNIST.csv`)  
-2. **Split data** into training and development sets  
-3. **Initialize parameters** with small random values  
-4. **Train** with `gradient_descent(X_train, Y_train, alpha, iterations)`  
-5. **Evaluate** on the dev set using `make_predictions` and `get_accuracy`  
-6. **Visualize** predictions with `test_prediction(index, W1, b1, W2, b2)`
-
----
-
-## 💡 Example
+Training is done using gradient descent:
 
 ```python
-# Train the network
-W1, b1, W2, b2 = gradient_descent(X_train, Y_train, 0.10, 500)
+W1, b1, W2, b2 = gradient_descent(X_train, Y_train, alpha=0.10, iterations=500)
+```
+- Prints accuracy every 10 iterations to monitor learning progress.  
+- Updates the weights and biases so the network can recognize digits better over time.
 
-# Evaluate on dev set
+---
+
+## 🔍 Evaluation
+
+### Development Set Accuracy
+
+Checks how well the trained network generalizes to unseen data:
+
+```python
 dev_predictions = make_predictions(X_dev, W1, b1, W2, b2)
-accuracy = get_accuracy(dev_predictions, Y_dev)
-print("Dev Set Accuracy:", accuracy)
+get_accuracy(dev_predictions, Y_dev)
+```
+## 🔍 Visual Inspection
 
-# Visualize a few predictions
-test_prediction(0, W1, b1, W2, b2)
-test_prediction(1, W1, b1, W2, b2)
+You can visualize individual predictions:
+
+```python
+test_prediction(index, W1, b1, W2, b2)
+```
+- Shows the digit, predicted label, and true label.
+
+---
+
+## ⚙️ How to Run
+
+1. Clone the repository.  
+2. Ensure you have the required packages: `numpy`, `pandas`, `matplotlib`.  
+3. Place `MNIST.csv` in the project folder.  
+4. Run the notebook cells in order.  
+
+---
+
+## 💡 Notes
+
+- The network is simple and educational — not optimized for speed or state-of-the-art accuracy.  
+- Normalizing pixel values (dividing by 255) is crucial for stable training.  
+- ReLU and Softmax were chosen for simplicity and interpretability.
+
+---
+
+## 🤓 Fun Facts
+
+- All code is written from scratch — no high-level libraries were used.  
+- You can tweak `alpha` (learning rate) or the number of iterations to see how training changes.  
+- Watching the network learn is like watching a student slowly get be
+
